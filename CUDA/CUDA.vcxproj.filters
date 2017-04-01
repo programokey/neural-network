@@ -24,6 +24,12 @@
     <ClInclude Include="statistical.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="solver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="adam.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="源文件">
@@ -46,5 +52,6 @@
     <ClCompile Include="statistical.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="adam.cpp" />
   </ItemGroup>
 </Project>
