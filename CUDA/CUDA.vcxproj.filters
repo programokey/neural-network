@@ -27,7 +27,16 @@
     <ClInclude Include="solver.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="adam.h">
+    <ClInclude Include="solver\AdaGrad.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="solver\adam.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="solver\SGD.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="solver\RMSProp.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -52,6 +61,18 @@
     <ClCompile Include="statistical.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="adam.cpp" />
+    <ClCompile Include="solver\adam.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="solver\AdaGard.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="solver\AdaGrad.cpp" />
+    <ClCompile Include="solver\SGD.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="solver\RMSProp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

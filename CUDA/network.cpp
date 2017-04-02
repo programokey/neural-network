@@ -23,24 +23,18 @@ network::network(std::vector<int> &unit_count)
 
 void network::init_training()
 {
-	this->X.resize(depth);
-	this->Y.resize(depth);
-	this->m.resize(depth - 1);
-	this->v.resize(depth - 1);
 	this->dW.resize(depth - 1);
 	this->dGamma.resize(depth - 1);
 	this->dBeta.resize(depth - 1);
-	this->mBeta.resize(depth - 1);
-	this->mGamma.resize(depth - 1);
-	this->vBeta.resize(depth - 1);
-	this->vGamma.resize(depth - 1);
-#pragma omp parallel for num_threads(threads_count)
-	for (int i = 0; i < depth - 1; i++)
-		m[i] = v[i] = zeros(size(W[i]));
-	for (int i = 1; i < depth - 1; i++) {
-		mBeta[i] = vBeta[i] = zeros(size(beta[i]));
-		mGamma[i] = vGamma[i] = zeros(size(gamma[i]));
-	}
+	for (int i = 0; i < W.size(); i++)
+		solver->signup(&(W[i]), &(dW[i]));
+	for (int i = 0; i < beta.size(); i++)
+		solver->signup(&(gamma[i]), &(dGamma[i]));
+	for (int i = 0; i < beta.size(); i++)
+		solver->signup(&(beta[i]), &(dBeta[i]));
+	this->X.resize(depth);
+	this->Y.resize(depth);
+
 	char file[255];
 	sprintf(file, "loss_%d.txt", time(NULL));
 	lossf = fopen(file, "w");
@@ -87,7 +81,7 @@ void network::train()
 		Y[0] = X[0];
 		int batch_it = 0;
 		real loss = 1e23, prev_loss = 1e233;
-		learning_rate = 3e-2*pow(0.8, batch_num);
+		solver->set_learning_rate(3e-2*pow(0.8, batch_num));
 		for (int t = 0; t < iteration; t++) {
 			t1 = omp_get_wtime();
 			forward();
@@ -98,21 +92,21 @@ void network::train()
 			loss = get_gradient();
 			t2 = omp_get_wtime();
 			backward_time = t2 - t1;
-			if (loss > prev_loss + 1e-3)
-				learning_rate *= decay;
+			//if (loss > prev_loss + 1e-3)	
+				//learning_rate *= decay;
 			if (loss < 1e-6 || fabs(loss - prev_loss) < 1e-6)
 				break;
 			t1 = omp_get_wtime();
-			regulation();
+			solver->regulation();
 			t2 = omp_get_wtime();
 			regulation_time = t2 - t1;
 			t1 = omp_get_wtime();
-			adma(t);
+			solver->update();
 			t2 = omp_get_wtime();
 			adma_time = t2 - t1;
 			batch_it++;
 			if (batch_it % 1000 == 0) {
-				printf("forward_time = %g,\n backward_time = %g,\n regulation_time = %g,\nadma_time = %g\n",
+				printf("forward_time = %g,\nbackward_time = %g,\nregulation_time = %g,\nadma_time = %g\n",
 					forward_time, backward_time, regulation_time, adma_time);
 				printf("%d/%d\n", batch_it, iteration);
 			}
@@ -146,7 +140,6 @@ matrix network::classify(matrix & feature)
 	}
 	x = W[depth - 2] * x;
 	return x;
-	//return get_class(x);
 }
 
 void network::save(const char * filename)
@@ -196,14 +189,14 @@ void network::set_batch_size(int batch_size)
 	this->batch_size = batch_size;
 }
 
-void network::set_lambda(real lambda)
+void network::set_regularize_rate(real lambda)
 {
-	this->lambda = lambda;
+	solver->set_regularize_rate(lambda);
 }
 
 void network::set_learning_rate(real learning_rate)
 {
-	this->learning_rate = learning_rate;
+	solver->set_learning_rate(learning_rate);
 }
 
 network::~network()
@@ -211,70 +204,18 @@ network::~network()
 	this->dW.clear();
 	this->W.clear();
 	this->X.clear();
-	this->m.clear();
-	this->v.clear();
 	this->dBeta.clear();
 	this->dGamma.clear();
 	this->beta.clear();
 	this->gamma.clear();
-	this->mBeta.clear();
-	this->mGamma.clear();
 	this->sigma.clear();
 	this->mu.clear();
+	free(this->solver);
 	fcloseall();
-}
-
-void network::adma(int t)
-{
-	real beta1t = beta1*pow(1 - 1e-8, t++);
-//#pragma omp parallel for num_threads(threads_count)
-	for (int i = 1; i < depth - 1; i++) {
-		matrix mb, vb;
-		mBeta[i] = beta1t*mBeta[i] + (1 - beta1t)*(dBeta[i]);
-		mGamma[i] = beta1t*mGamma[i] + (1 - beta1t)*(dGamma[i]);
-		vBeta[i] = beta2*vBeta[i] + (1 - beta2)*dot_mul(dBeta[i], dBeta[i]);
-		vGamma[i] = beta2*vGamma[i] + (1 - beta2)*dot_mul(dGamma[i], dGamma[i]);
-
-		vb = vBeta[i] / (1 - pow(beta2, t));
-		mb = mBeta[i] / (1 - pow(beta1, t));
-		mb /= (sqrt(vb) + 1e-7);
-		mb *= learning_rate;
-		beta[i] -= mb;
-
-		vb = vGamma[i] / (1 - pow(beta2, t));
-		mb = mGamma[i] / (1 - pow(beta1, t));
-		mb /= (sqrt(vb) + 1e-7);
-		mb *= learning_rate;
-		gamma[i] -= mb;
-	}
-	for (int i = 0; i < depth - 1; i++) {
-		matrix mb, vb;
-		m[i] *= beta1t;
-		m[i] += (1 - beta1t)*(dW[i]);
-		v[i] *= beta2;
-		v[i] += (1 - beta2)*dot_mul(dW[i], dW[i]);
-		vb = v[i] / (1 - pow(beta2, t));
-		mb = m[i] / (1 - pow(beta1, t));
-		mb /= (sqrt(vb) + 1e-7);
-		mb *= learning_rate;
-		W[i] -= mb;
-	}
-}
-
-void network::regulation()
-{
-#pragma omp parallel for num_threads(threads_count)
-	for (int i = 0; i < depth - 1; i++)
-		dW[i] += lambda*W[i];
-	for (int i = 1; i < depth - 1; i++) {
-		dBeta[i] += lambda*beta[i];
-		dGamma[i] += lambda*gamma[i];
-	}
 }
 
 real network::get_gradient()
 {
-	double t1, t2;
 	real loss = 0.0;
 	for (int i = 0; i < depth - 1; i++) {
 		dBeta[i] = zeros(size(beta[i]));

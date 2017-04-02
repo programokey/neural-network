@@ -61,6 +61,8 @@ public:
 	friend matrix size(matrix& a);
 
 	friend matrix sum(matrix& a);
+	friend real norm2(matrix& a);
+	friend real sum_all(matrix& a);
 	friend matrix mean(matrix& a);
 	friend matrix zeros(int n);
 	friend matrix zeros(matrix& a);

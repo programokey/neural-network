@@ -166,18 +166,25 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
     <CudaCompile Include="matrix.cu" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="adam.h" />
     <ClInclude Include="distribution_classification.h" />
     <ClInclude Include="matrix.cuh" />
     <ClInclude Include="network.h" />
     <ClInclude Include="solver.h" />
+    <ClInclude Include="solver\AdaGrad.h" />
+    <ClInclude Include="solver\adam.h" />
+    <ClInclude Include="solver\RMSProp.h" />
+    <ClInclude Include="solver\SGD.h" />
     <ClInclude Include="statistical.h" />
     <ClInclude Include="test.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="adam.cpp" />
     <ClCompile Include="distribution_classification.cpp" />
     <ClCompile Include="network.cpp" />
+    <ClCompile Include="solver\AdaGard.cpp" />
+    <ClCompile Include="solver\AdaGrad.cpp" />
+    <ClCompile Include="solver\adam.cpp" />
+    <ClCompile Include="solver\RMSProp.cpp" />
+    <ClCompile Include="solver\SGD.cpp" />
     <ClCompile Include="statistical.cpp" />
     <ClCompile Include="test.cpp" />
   </ItemGroup>

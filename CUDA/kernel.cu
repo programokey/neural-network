@@ -9,7 +9,11 @@
 #include "distribution_classification.h"
 int main()
 {
-	test(1024, 256, 1e-3, 3*1e-2);
+	//RMSProp	44.7
+	//SGD		142.365
+	//Adma		7.76
+	//AdaGrad	
+	test(1024, 256, 1e-3,1e-3);
 	//distribution_classification(2560, 256, 1e-3, 1e-3);
 	system("pause");
 	return 0;

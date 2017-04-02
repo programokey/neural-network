@@ -1,6 +1,10 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 #include <vector>
+#include "solver\adam.h"
+#include "solver\AdaGrad.h"
+#include "solver\SGD.h"
+#include "solver\RMSProp.h"
 #include "matrix.cuh"
 class network
 {
@@ -13,13 +17,11 @@ public:
 	void save(const char* filename);
 	void load(const char* filename);
 	void set_batch_size(int batch_size);
-	void set_lambda(real lambda);
+	void set_regularize_rate(real lambda);
 	void set_learning_rate(real learning_rate);
 	friend matrix get_class(matrix& out);
 	~network();
 private:
-	void adma(int t);
-	void regulation();
 	real get_gradient();
 	void forward();
 	void BN(matrix& x, int layer);
@@ -28,31 +30,23 @@ private:
 	std::vector<int> unit_count;
 	int batch_size = 400;
 	int iteration = 10000;
-	real lambda = 1e-3;
-	real learning_rate = 1e-3;
-	real beta1 = 0.9;
-	real beta2 = 0.9;//0.999;
 	real decay = 0.9;
 	matrix trainning_set;
 	matrix label;
 	matrix y;
 
+	solver* solver = new AdaGrad;
+
 	std::vector<matrix> X;
 	std::vector<matrix> Y;
 	std::vector<matrix> W;
 	std::vector<matrix> dW;
-	std::vector<matrix> m;
-	std::vector<matrix> v;
 	std::vector<matrix> sigma;
 	std::vector<matrix> mu;
 	std::vector<matrix> gamma;
 	std::vector<matrix> dGamma;
-	std::vector<matrix> mGamma;
-	std::vector<matrix> vGamma;
 	std::vector<matrix> beta;
 	std::vector<matrix> dBeta;
-	std::vector<matrix> mBeta;
-	std::vector<matrix> vBeta;
 	FILE* lossf = NULL;
 	bool cal = false;
 };

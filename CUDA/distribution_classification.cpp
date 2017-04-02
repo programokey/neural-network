@@ -32,7 +32,7 @@ void distribution_classification(int training_set_size, int batch_size, real lam
 	}
 	dist_net.set_train_set(training_set, y);
 	dist_net.set_batch_size(batch_size);
-	dist_net.set_lambda(lambda);
+	dist_net.set_regularize_rate(lambda);
 	dist_net.set_learning_rate(learning_rate);
 	dist_net.train();
 	dist_net.save("training_result1.dn");
@@ -106,7 +106,7 @@ void retrain_distribution_classification(int training_set_size, int batch_size, 
 	}
 	dist_net.set_train_set(training_set, y);
 	dist_net.set_batch_size(batch_size);
-	dist_net.set_lambda(lambda);
+	dist_net.set_regularize_rate(lambda);
 	dist_net.set_learning_rate(learning_rate);
 	dist_net.train();
 	dist_net.save("training_result.dn");

@@ -732,6 +732,41 @@ matrix sum(matrix & a)
 	sum_kernel<<<numBlocks, block_size>>>(a.data, res.data, a.m, a.n);
 	return res;
 }
+__global__ void sum_all_kernel(real* x, real* y, int m, int n)
+{
+	for (int i = 0; i < m*n; i++) {
+		*y += x[i];
+	}
+}
+real sum_all(matrix& a)
+{
+	real* y, res;
+	cudaMalloc(&y, sizeof(real));
+	sum_all_kernel<<<1,1>>>(a.data, y, a.m, a.n);
+	cudaMemcpy(&res, y, sizeof(real), cudaMemcpyDeviceToHost);
+	cudaFree(y);
+	return res;
+}
+__global__ void norm2_kernel(real* x, real* y, int m, int n)
+{
+	/*int index = blockDim.x*blockIdx.x + threadIdx.x;
+	int stride = blockDim.x * gridDim.x;
+	for (int i = index; i < m; i += stride) {
+		y[index] = x[i] * x[i];
+	}*/
+	for (int i = 0; i < m*n; i++) {
+		*y += x[i] * x[i];
+	}
+}
+real norm2(matrix & a)
+{
+	real* y, res;
+	cudaMalloc(&y,sizeof(real));
+	norm2_kernel<<<1,1>>>(a.data, y, a.m, a.n);
+	cudaMemcpy(&res, y, sizeof(real), cudaMemcpyDeviceToHost);
+	cudaFree(y);
+	return sqrt(res);
+}
 __global__ void mean_kernel(real* x, real* y, int m, int n)
 {
 	int index = blockDim.x*blockIdx.x + threadIdx.x;

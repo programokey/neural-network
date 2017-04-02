@@ -1,6 +1,6 @@
 #ifndef SOLVER_H
 #define SOLVER_H
-#include "matrix.cuh"
+#include "../matrix.cuh"
 class solver
 {
 public:

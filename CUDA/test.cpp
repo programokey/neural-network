@@ -64,7 +64,7 @@ real test(int training_set_size, int batch_size, real lambda, real learning_rate
 	network net(unit_count);
 	net.set_train_set(training_set, y);
 	net.set_batch_size(batch_size);
-	net.set_lambda(lambda);
+	net.set_regularize_rate(lambda);
 	printf("begin training!\n");
 	double t1 = omp_get_wtime();
 	net.train();

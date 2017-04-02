@@ -1,6 +1,7 @@
 #include "adam.h"
 #include <vector>
 #include <cmath>
+#include <cstdio>
 
 void adam::signup(matrix * parameter, matrix * gradient)
 {
@@ -22,7 +23,14 @@ void adam::update()
 		mb = m[i] / (1 - pow(beta1, t));
 		vb = v[i] / (1 - pow(beta2, t));
 		mb /= (sqrt(vb) + epslion);
+		//mb /= (sqrt(sum_all(vb)) + epslion);
 		mb *= learning_rate;
 		*theta[i] = (*theta[i]) - mb;
 	}
+}
+
+void adam::regulation()
+{
+	for (int i = 0; i < count; i++)
+		(*g[i]) += regularize_rate*(*theta[i]);
 }
